@@ -1,6 +1,6 @@
 // =====================================================
 // STUDENT POCKET - TELEGRAM BOT
-// CommonJS Version
+// CommonJS Version - Render Ready
 // =====================================================
 
 const TelegramBot = require('node-telegram-bot-api');
@@ -11,10 +11,10 @@ const path = require('path');
 // CONFIGURATION
 // =====================================================
 
-// 👇 এখানে তোমার নতুন BotFather Bot Token বসাও
-const BOT_TOKEN = 'PASTE_YOUR_NEW_BOT_TOKEN_HERE';
+// এখানে তোমার নতুন BotFather Token বসাও
+const BOT_TOKEN = '8116781152:AAHScZRfT3jhd85ZWIu2Ir8FBlPvDhqXgTo';
 
-// 👇 এখানে তোমার deployed Mini App URL বসাও
+// এখানে তোমার deployed Mini App URL বসাও
 const MINI_APP_URL = 'https://your-mini-app-url.com';
 
 // =====================================================
@@ -38,29 +38,23 @@ if (
 }
 
 // =====================================================
-// EXPRESS APP
+// EXPRESS SERVER
 // =====================================================
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
-// JSON support
 app.use(express.json());
 
-// Serve Mini App files
+// Serve Mini App
 app.use(
     express.static(
         path.join(__dirname, 'public')
     )
 );
 
-// =====================================================
-// HOME ROUTE
-// =====================================================
-
+// Home Route
 app.get('/', (req, res) => {
-
     res.sendFile(
         path.join(
             __dirname,
@@ -68,7 +62,6 @@ app.get('/', (req, res) => {
             'index.html'
         )
     );
-
 });
 
 // =====================================================
@@ -85,14 +78,6 @@ const bot = new TelegramBot(
 // =====================================================
 // /START
 // =====================================================
-//
-// Normal:
-// /start
-//
-// Referral:
-// /start REFERRAL_ID
-//
-// =====================================================
 
 bot.onText(
     /^\/start(?:\s+(.+))?$/,
@@ -102,17 +87,14 @@ bot.onText(
 
             const chatId = msg.chat.id;
 
-            // Get referral ID
+            // Referral ID
             const referralId =
                 match &&
                 match[1]
                     ? match[1].trim()
                     : null;
 
-            // =================================================
-            // MINI APP URL
-            // =================================================
-
+            // Mini App URL
             let appUrl = MINI_APP_URL;
 
             // Add referral information
@@ -131,52 +113,42 @@ bot.onText(
             // WELCOME MESSAGE
             // =================================================
 
-            let message =
+            let welcomeMessage =
                 `👋 Welcome to Student Pocket!\n\n` +
-
                 `🎓 Student Earning Platform\n\n` +
-
-                `এখানে বিভিন্ন শিক্ষামূলক কার্যক্রমের ` +
-                `মাধ্যমে রিওয়ার্ড অর্জন করতে পারবেন।\n\n`;
+                `এখানে আপনি বিভিন্ন শিক্ষামূলক কার্যক্রমের মাধ্যমে ` +
+                `রিওয়ার্ড অর্জন করতে পারবেন।\n\n`;
 
             // Referral information
             if (referralId) {
 
-                message +=
-                    `👥 Referral ID: ${referralId}\n\n`;
+                welcomeMessage +=
+                    `🔗 Referral ID: ${referralId}\n\n`;
             }
 
-            message +=
+            welcomeMessage +=
                 `👇 নিচের বাটনে ক্লিক করে Mini App ওপেন করুন।`;
 
             // =================================================
-            // SEND WELCOME MESSAGE
+            // SEND MESSAGE
             // =================================================
 
             await bot.sendMessage(
                 chatId,
-                message,
+                welcomeMessage,
                 {
-
                     reply_markup: {
-
                         inline_keyboard: [
-
                             [
                                 {
-                                    text:
-                                        '🚀 Open Student Pocket',
-
+                                    text: '🚀 Open Student Pocket',
                                     web_app: {
                                         url: appUrl
                                     }
                                 }
                             ]
-
                         ]
-
                     }
-
                 }
             );
 
@@ -215,10 +187,10 @@ bot.onText(
                 `💸 Withdrawal\n` +
                 `👤 Profile\n` +
                 `🔔 Notifications\n` +
-                `🎓 Student Activities\n\n` +
+                `🎓 Student Learning Activities\n\n` +
 
-                `🚀 Mini App খুলে আপনার available ` +
-                `features ব্যবহার করুন।`;
+                `🚀 Mini App খুলে আপনার available features ` +
+                `ব্যবহার করুন।`;
 
             await bot.sendMessage(
                 msg.chat.id,
@@ -254,7 +226,7 @@ bot.on(
 );
 
 // =====================================================
-// EXPRESS SERVER START
+// START EXPRESS SERVER
 // =====================================================
 
 app.listen(
@@ -266,7 +238,7 @@ app.listen(
         );
 
         console.log(
-            `🤖 Student Pocket Bot is running`
+            `🤖 Student Pocket Telegram Bot is running`
         );
 
         console.log(
@@ -274,156 +246,7 @@ app.listen(
         );
 
     }
-);    console.error('❌ MINI_APP_URL is not configured.');
-    process.exit(1);
-}
-
-// =====================================================
-// TELEGRAM BOT
-// =====================================================
-
-const bot = new TelegramBot(BOT_TOKEN, {
-    polling: true
-});
-
-// =====================================================
-// EXPRESS SERVER
-// =====================================================
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// =====================================================
-// HOME ROUTE
-// =====================================================
-
-app.get('/', (req, res) => {
-    res.sendFile(
-        path.join(__dirname, 'public', 'index.html')
-    );
-});
-
-// =====================================================
-// /START COMMAND
-// =====================================================
-//
-// Supports:
-//
-// /start
-// /start REFERRAL_ID
-//
-// =====================================================
-
-bot.onText(/^\/start(?:\s+(.+))?$/, async (msg, match) => {
-
-    try {
-
-        const chatId = msg.chat.id;
-
-        // Referral ID
-        const referralId = match?.[1]?.trim() || null;
-
-        // Mini App URL
-        let appUrl = MINI_APP_URL;
-
-        // Add Telegram Mini App referral parameter
-        if (referralId) {
-
-            const separator = appUrl.includes('?')
-                ? '&'
-                : '?';
-
-            appUrl =
-                `${appUrl}${separator}startapp=${encodeURIComponent(referralId)}`;
-        }
-
-        // =================================================
-        // WELCOME MESSAGE
-        // =================================================
-
-        let welcomeMessage =
-            `👋 Welcome to Student Pocket!\n\n` +
-            `🎓 Student Earning Platform\n\n` +
-            `এখানে আপনি বিভিন্ন শিক্ষামূলক কার্যক্রমের মাধ্যমে ` +
-            `রিওয়ার্ড অর্জন করতে পারবেন।\n\n`;
-
-        // Referral information
-        if (referralId) {
-
-            welcomeMessage +=
-                `🔗 Referral ID: ${referralId}\n\n`;
-
-        }
-
-        welcomeMessage +=
-            `👇 নিচের বাটনে ক্লিক করে Mini App ওপেন করুন।`;
-
-        // =================================================
-        // SEND MESSAGE
-        // =================================================
-
-        await bot.sendMessage(chatId, welcomeMessage, {
-
-            reply_markup: {
-
-                inline_keyboard: [
-
-                    [
-                        {
-                            text: '🚀 Open Student Pocket',
-                            web_app: {
-                                url: appUrl
-                            }
-                        }
-                    ]
-
-                ]
-
-            }
-
-        });
-
-    } catch (error) {
-
-        console.error(
-            '❌ /start command error:',
-            error
-        );
-
-    }
-
-});
-
-// =====================================================
-// /HELP COMMAND
-// =====================================================
-
-bot.onText(/^\/help$/, async (msg) => {
-
-    try {
-
-        const helpMessage =
-            `📚 Student Pocket Help\n\n` +
-
-            `🎯 Available Features:\n\n` +
-
-            `📝 MCQ Quiz\n` +
-            `➗ Math Solver\n` +
-            `📖 Grammar Solver\n` +
-            `👥 Referral System\n` +
-            `💰 Earnings\n` +
-            `💸 Withdrawal\n` +
-            `👤 Profile\n` +
-            `🔔 Notifications\n` +
-            `🎓 Student Learning Activities\n\n` +
-
-            `🚀 Mini App খুলে আপনার available features ` +
-            `ব্যবহার করুন।`;
-
-        await bot.sendMessage(
+);Message(
             msg.chat.id,
             helpMessage
         );
