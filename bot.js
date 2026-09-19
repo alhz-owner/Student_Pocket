@@ -1,6 +1,10 @@
-const TelegramBot = require('node-telegram-bot-api');
-const express = require('express');
-const path = require('path');
+import TelegramBot from 'node-telegram-bot-api';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const BOT_TOKEN = '8116781152:AAFzQkOE9mv1NTLTvGghKXOv6JHMefsUUV8';
 const MINI_APP_URL = 'https://your-domain-or-vercel-link.com';
