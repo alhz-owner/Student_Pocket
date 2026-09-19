@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student_Pocket - Mini App</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151c2c;
+            --card-accent: #1e293b;
+            --text-main: #ffffff;
+            --text-sub: #94a3b8;
+            --primary-blue: #0088cc;
+            --accent-glow: #0088cc44;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 70px;
+            box-shadow: 0 0 30px rgba(0, 136, 204, 0.15);
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Common Elements */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #0088cc, #005588);
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #991b1b);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--card-bg);
+            border: 1px solid #2d3748;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-blue);
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .brand i {
+            color: var(--primary-blue);
+            font-size: 22px;
+        }
+
+        /* Dashboard & UI Components */
+        .badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid #334155;
+            border-radius: 18px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 150px;
+            height: 150px;
+            background: var(--accent-glow);
+            filter: blur(50px);
+            border-radius: 50%;
+        }
+
+        .balance-title {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 5px 0;
+            color: #fff;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .earn-card {
+            background: var(--card-bg);
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .earn-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        .earn-card i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .earn-card.mcq i { color: #a855f7; }
+        .earn-card.math i { color: #3b82f6; }
+        .earn-card.grammar i { color: #06b6d4; }
+
+        .earn-card span {
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .earn-card small {
+            font-size: 10px;
+            color: var(--text-sub);
+        }
+
+        /* History List */
+        .history-list {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 10px 15px;
+            border: 1px solid #1e293b;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-info div {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .history-info small {
+            font-size: 10px;
+            color: var(--text-sub);
+        }
+
+        .history-amount {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 14px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #0f172a;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            font-size: 10px;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-blue);
+        }
+
+        /* Quiz Activity Screen */
+        .quiz-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #1e293b;
+            margin-top: 15px;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .timer-progress {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-blue);
+            transition: width 1s linear;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: white;
+            text-align: left;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-blue);
+            background: rgba(0, 136, 204, 0.2);
+        }
+
+        /* Admin Tab Navigation */
+        .admin-tabs {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+        }
+
+        .admin-tab-btn {
+            padding: 8px 12px;
+            background: var(--card-bg);
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            color: var(--text-sub);
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .admin-tab-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Welcome & Auth Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div style="text-align: center; margin-top: 40px; margin-bottom: 30px;">
+                <i class="fa-paper-plane fab" style="font-size: 60px; color: var(--primary-blue);"></i>
+                <h2 style="margin-top: 15px;">Welcome to Student_Pocket</h2>
+                <p style="color: var(--text-sub); font-size: 13px; margin-top: 5px;">Earn while learning with quizzes</p>
+            </div>
+
+            <!-- Telegram Auth Card -->
+            <div style="background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid #1e293b; margin-bottom: 20px;">
+                <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">Telegram Account-Based Auth</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 45px; height: 45px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold;" id="auth-avatar">U</div>
+                    <div>
+                        <div id="auth-name" style="font-weight: 600; font-size: 14px;">Loading...</div>
+                        <div id="auth-id" style="font-size: 11px; color: var(--text-sub);">ID: ---------</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <div style="background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid #1e293b; margin-bottom: 20px;">
+                <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Student Verification / Registration</div>
+                <div class="input-group">
+                    <label>University / College Name</label>
+                    <input type="text" id="reg-uni" class="input-field" placeholder="e.g. Dhaka University">
+                </div>
+                <div class="input-group">
+                    <label>Student ID Number</label>
+                    <input type="text" id="reg-studentid" class="input-field" placeholder="e.g. ST-882910">
+                </div>
+                <button class="btn" onclick="completeRegistration()">Complete Verification</button>
+            </div>
+            
+            <div id="ref-detected" style="text-align: center; font-size: 12px; color: var(--success); display: none;">
+                <i class="fa-check-circle fas"></i> Referral detected & linked!
+            </div>
+        </div>
+
+        <!-- Main Dashboard Screen -->
+        <div id="dashboard-screen" class="screen">
+            <div class="app-header">
+                <div class="brand">
+                    <i class="fa-graduation-cap fas"></i> Student_Pocket
+                </div>
+                <div>
+                    <span class="badge"><i class="fa-check-circle fas"></i> Verified Student</span>
+                    <i class="fa-shield-halved fas" style="color: var(--warning); margin-left: 8px; cursor: pointer;" onclick="checkAdminAccess()" title="Admin Panel"></i>
+                </div>
+            </div>
+
+            <!-- Balance Card -->
+            <div class="balance-card">
+                <div class="balance-title">User Balance</div>
+                <div class="balance-amount" id="user-balance">$0.00</div>
+                <div style="font-size: 11px; color: var(--text-sub); display: flex; justify-content: space-between;">
+                    <span>Earned Today: <b id="earned-today" style="color: white;">$0.00</b></span>
+                    <span>Total Referrals: <b id="dash-ref-count" style="color: white;">0</b></span>
+                </div>
+            </div>
+
+            <!-- Earning Categories -->
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">Earning Categories</div>
+            <div class="grid-3">
+                <div class="earn-card mcq" onclick="startActivity('mcq')">
+                    <i class="fa-list-check fas"></i>
+                    <span>MCQ Quiz</span>
+                    <small id="mcq-reward">+ $0.05</small>
+                </div>
+                <div class="earn-card math" onclick="startActivity('math')">
+                    <i class="fa-calculator fas"></i>
+                    <span>Math Solver</span>
+                    <small id="math-reward">+ $0.10</small>
+                </div>
+                <div class="earn-card grammar" onclick="startActivity('grammar')">
+                    <i class="fa-spell-check fas"></i>
+                    <span>Grammar</span>
+                    <small id="grammar-reward">+ $0.08</small>
+                </div>
+            </div>
+
+            <!-- Earning History -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 14px; font-weight: 600;">Earning History</span>
+                <span style="font-size: 11px; color: var(--primary-blue);">View All</span>
+            </div>
+            <div class="history-list" id="history-container">
+                <!-- Dynamic Items -->
+            </div>
+        </div>
+
+        <!-- Activity Screen (MCQ/Math/Grammar) -->
+        <div id="activity-screen" class="screen">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <button style="background: none; border: none; color: white; font-size: 18px; cursor: pointer;" onclick="showScreen('dashboard-screen')">
+                    <i class="fa-arrow-left fas"></i>
+                </button>
+                <h3 id="activity-title">MCQ Quiz</h3>
+                <span id="activity-score-badge" class="badge">Score: 0 pts</span>
+            </div>
+
+            <div class="quiz-box">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">
+                    <span>Question <span id="q-curr">1</span>/<span id="q-total">1</span></span>
+                    <span>Timer: <b id="timer-text" style="color: white;">20s</b></span>
+                </div>
+                <div class="timer-bar">
+                    <div class="timer-progress" id="timer-progress"></div>
+                </div>
+
+                <div style="font-weight: 600; font-size: 15px; margin-bottom: 15px; min-height: 40px;" id="q-text">
+                    Loading question...
+                </div>
+
+                <div id="options-container">
+                    <!-- Options injected here -->
+                </div>
+
+                <button class="btn" style="margin-top: 15px;" onclick="submitAnswer()">Submit Answer</button>
+            </div>
+        </div>
+
+        <!-- Referral & Profile Screen -->
+        <div id="profile-screen" class="screen">
+            <h3 style="margin-bottom: 15px;">Referral & Profile</h3>
+
+            <!-- Referral Card -->
+            <div style="background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid #1e293b; margin-bottom: 15px;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Referral System</div>
+                <div class="input-group">
+                    <label>Your Unique Referral Link</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="ref-link-input" class="input-field" readonly style="font-size: 11px;">
+                        <button class="btn" style="width: auto; padding: 0 15px;" onclick="copyReferral()"><i class="fa-copy fas"></i></button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; background: #0f172a; padding: 10px; border-radius: 8px;">
+                    <span>Referral ID: <b id="ref-id-display">--</b></span>
+                    <span>Commission: <b id="ref-comm-display">10%</b></span>
+                </div>
+            </div>
+
+            <!-- Profile Settings & Info -->
+            <div style="background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid #1e293b; margin-bottom: 15px;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Profile Details</div>
+                <div style="font-size: 12px; color: var(--text-sub); display: flex; flex-direction: column; gap: 8px;">
+                    <div>Name: <span id="prof-name" style="color: white;">--</span></div>
+                    <div>University: <span id="prof-uni" style="color: white;">--</span></div>
+                    <div>Student ID: <span id="prof-studentid" style="color: white;">--</span></div>
+                </div>
+            </div>
+
+            <!-- Withdrawal System -->
+            <div style="background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid #1e293b; margin-bottom: 15px;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Withdrawal System</div>
+                <div class="input-group">
+                    <label>Select Payment Method</label>
+                    <select id="withdraw-method" class="input-field">
+                        <option value="BKash">BKash</option>
+                        <option value="Nagad">Nagad</option>
+                        <option value="Crypto">Crypto (USDT)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Account Number / Wallet Address</label>
+                    <input type="text" id="withdraw-acc" class="input-field" placeholder="Enter account details">
+                </div>
+                <div class="input-group">
+                    <label>Amount ($)</label>
+                    <input type="number" id="withdraw-amt" class="input-field" placeholder="Min $5.00">
+                </div>
+                <button class="btn btn-success" onclick="processWithdrawal()">Request Withdrawal</button>
+            </div>
+
+            <!-- Support & Tutorials Links -->
+            <div style="background: var(--card-bg); border-radius: 14px; padding: 15px; border: 1px solid #1e293b;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Help & Tutorials</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a id="support-link" href="#" target="_blank" style="color: var(--primary-blue); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-headset fas"></i> Contact Support
+                    </a>
+                    <a id="tutorial-link" href="#" target="_blank" style="color: var(--primary-blue); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-play-circle fas"></i> Watch App Tutorials
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel Screen -->
+        <div id="admin-screen" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3><i class="fa-user-shield fas" style="color: var(--danger);"></i> Admin Panel</h3>
+                <button class="btn" style="width: auto; padding: 5px 10px; font-size: 12px;" onclick="showScreen('dashboard-screen')">Exit</button>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" onclick="showAdminTab('tab-users')">Users</button>
+                <button class="admin-tab-btn" onclick="showAdminTab('tab-content')">Content</button>
+                <button class="admin-tab-btn" onclick="showAdminTab('tab-config')">Config</button>
+                <button class="admin-tab-btn" onclick="showAdminTab('tab-broadcast')">Broadcast</button>
+            </div>
+
+            <!-- Tab: Users Management -->
+            <div id="tab-users" class="admin-tab-content">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">User Management</div>
+                <div id="admin-users-list" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- User Items -->
+                </div>
+            </div>
+
+            <!-- Tab: Content Management -->
+            <div id="tab-content" class="admin-tab-content" style="display: none;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Add Question</div>
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="admin-q-cat" class="input-field">
+                        <option value="mcq">MCQ Quiz</option>
+                        <option value="math">Math Solver</option>
+                        <option value="grammar">Grammar Solver</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Question Text</label>
+                    <input type="text" id="admin-q-text" class="input-field">
+                </div>
+                <div class="input-group">
+                    <label>Options (Comma Separated)</label>
+                    <input type="text" id="admin-q-options" class="input-field" placeholder="Opt1, Opt2, Opt3, Opt4">
+                </div>
+                <div class="input-group">
+                    <label>Correct Option Index (0-3)</label>
+                    <input type="number" id="admin-q-correct" class="input-field" placeholder="0">
+                </div>
+                <button class="btn" onclick="adminAddQuestion()">Add Question</button>
+            </div>
+
+            <!-- Tab: Configuration -->
+            <div id="tab-config" class="admin-tab-content" style="display: none;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">System Rewards Config</div>
+                <div class="input-group">
+                    <label>MCQ Reward ($)</label>
+                    <input type="number" id="cfg-mcq" class="input-field" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Math Reward ($)</label>
+                    <input type="number" id="cfg-math" class="input-field" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Grammar Reward ($)</label>
+                    <input type="number" id="cfg-grammar" class="input-field" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Referral Bonus ($)</label>
+                    <input type="number" id="cfg-ref-bonus" class="input-field" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Support Link</label>
+                    <input type="text" id="cfg-support" class="input-field">
+                </div>
+                <div class="input-group">
+                    <label>Tutorial Link</label>
+                    <input type="text" id="cfg-tutorial" class="input-field">
+                </div>
+                <button class="btn btn-success" onclick="adminSaveConfig()">Save Settings</button>
+            </div>
+
+            <!-- Tab: Broadcast -->
+            <div id="tab-broadcast" class="admin-tab-content" style="display: none;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Send Global Notification</div>
+                <div class="input-group">
+                    <label>Notification Message</label>
+                    <textarea id="admin-broadcast-msg" class="input-field" rows="4" placeholder="Enter message for all users..."></textarea>
+                </div>
+                <button class="btn" onclick="adminSendBroadcast()">Send Broadcast</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="showScreen('dashboard-screen'); setNavActive(this);">
+                <i class="fa-house fas"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="showScreen('profile-screen'); setNavActive(this);">
+                <i class="fa-user fas"></i>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item" onclick="checkAdminAccess();">
+                <i class="fa-shield-halved fas"></i>
+                <span>Admin</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Script Engine -->
+    <script>
+        // Default Local Storage Database Initialization
+        const defaultDB = {
+            adminIDs: ["123456789", "8992573981"], // Admin Telegram User IDs
+            config: {
+                mcqReward: 0.05,
+                mathReward: 0.10,
+                grammarReward: 0.08,
+                refBonus: 0.20,
+                refCommission: 10,
+                supportUrl: "https://t.me/student_supportX",
+                tutorialUrl: "https://youtube.com"
+            },
+            questions: {
+                mcq: [
+                    { q: "What is the capital of Bangladesh?", options: ["Chittagong", "Dhaka", "Sylhet", "Khulna"], correct: 1 },
+                    { q: "Which core element is used in Web Mini Apps?", options: ["HTML/JS", "C++", "Python", "Java"], correct: 0 }
+                ],
+                math: [
+                    { q: "Solve: 12 + 15 = ?", options: ["25", "27", "30", "22"], correct: 1 },
+                    { q: "Solve: 5 * 8 = ?", options: ["35", "40", "45", "50"], correct: 1 }
+                ],
+                grammar: [
+                    { q: "Choose correct sentence:", options: ["He go to school", "He goes to school", "He going to school", "He gone to school"], correct: 1 }
+                ]
+            },
+            users: {},
+            broadcasts: []
+        };
+
+        // Init LocalStorage if empty
+        if (!localStorage.getItem('SP_DATABASE')) {
+            localStorage.setItem('SP_DATABASE', JSON.stringify(defaultDB));
+        }
+
+        function getDB() {
+            return JSON.parse(localStorage.getItem('SP_DATABASE'));
+        }
+
+        function saveDB(db) {
+            localStorage.setItem('SP_DATABASE', JSON.stringify(db));
+        }
+
+        // Current Application State
+        let db = getDB();
+        let tg = window.Telegram?.WebApp;
+        let currentUser = null;
+        let currentActivity = null;
+        let activeQIndex = 0;
+        let timerInterval = null;
+        let selectedOption = null;
+
+        // Initialize App
+        window.onload = function() {
+            if (tg) {
+                tg.expand();
+            }
+
+            // Telegram Auth User Simulation/Detection
+            let tgUser = tg?.initDataUnsafe?.user || {
+                id: "8839334383721",
+                first_name: "Student",
+                last_name: "User",
+                username: "student_user"
+            };
+
+            // Detect Referral Parameter from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const refBy = urlParams.get('ref');
+
+            // Render Auth Details on Welcome Screen
+            document.getElementById('auth-name').innerText = `${tgUser.first_name} ${tgUser.last_name || ''}`;
+            document.getElementById('auth-id').innerText = `ID: ${tgUser.id}`;
+            document.getElementById('auth-avatar').innerText = tgUser.first_name.charAt(0);
+
+            if (refBy) {
+                document.getElementById('ref-detected').style.display = 'block';
+            }
+
+            // Check if User Exists in Database
+            if (db.users[tgUser.id]) {
+                currentUser = db.users[tgUser.id];
+                if (currentUser.isRegistered) {
+                    loadUserData();
+                    showScreen('dashboard-screen');
+                }
+            } else {
+                // Initialize New User Record
+                currentUser = {
+                    id: tgUser.id,
+                    name: `${tgUser.first_name} ${tgUser.last_name || ''}`,
+                    university: '',
+                    studentId: '',
+                    balance: 0.00,
+                    earnedToday: 0.00,
+                    referrals: 0,
+                    referredBy: refBy || null,
+                    isRegistered: false,
+                    isBanned: false,
+                    history: []
+                };
+                db.users[tgUser.id] = currentUser;
+                saveDB(db);
+            }
+
+            updateConfigUI();
+        };
+
+        function updateConfigUI() {
+            document.getElementById('mcq-reward').innerText = `+ $${db.config.mcqReward.toFixed(2)}`;
+            document.getElementById('math-reward').innerText = `+ $${db.config.mathReward.toFixed(2)}`;
+            document.getElementById('grammar-reward').innerText = `+ $${db.config.grammarReward.toFixed(2)}`;
+            document.getElementById('support-link').href = db.config.supportUrl;
+            document.getElementById('tutorial-link').href = db.config.tutorialUrl;
+        }
+
+        function completeRegistration() {
+            const uni = document.getElementById('reg-uni').value.trim();
+            const studentId = document.getElementById('reg-studentid').value.trim();
+
+            if (!uni || !studentId) {
+                alert('Please enter both University Name and Student ID');
+                return;
+            }
+
+            currentUser.university = uni;
+            currentUser.studentId = studentId;
+            currentUser.isRegistered = true;
+
+            // Process Referral Bonus if exists
+            if (currentUser.referredBy && db.users[currentUser.referredBy]) {
+                const parentUser = db.users[currentUser.referredBy];
+                parentUser.balance += db.config.refBonus;
+                parentUser.referrals += 1;
+                parentUser.history.unshift({
+                    title: 'Referral Bonus',
+                    date: new Date().toLocaleDateString(),
+                    amount: db.config.refBonus
+                });
+            }
+
+            db.users[currentUser.id] = currentUser;
+            saveDB(db);
+
+            loadUserData();
+            showScreen('dashboard-screen');
+        }
+
+        function loadUserData() {
+            if (currentUser.isBanned) {
+                alert('Your account is banned by Admin.');
+                document.body.innerHTML = "<h2 style='color:red; text-align:center; margin-top:50px;'>Account Banned</h2>";
+                return;
+            }
+
+            document.getElementById('user-balance').innerText = `$${currentUser.balance.toFixed(2)}`;
+            document.getElementById('earned-today').innerText = `$${currentUser.earnedToday.toFixed(2)}`;
+            document.getElementById('dash-ref-count').innerText = currentUser.referrals;
+
+            // Profile Data
+            document.getElementById('prof-name').innerText = currentUser.name;
+            document.getElementById('prof-uni').innerText = currentUser.university;
+            document.getElementById('prof-studentid').innerText = currentUser.studentId;
+            document.getElementById('ref-id-display').innerText = currentUser.id;
+            document.getElementById('ref-comm-display').innerText = `${db.config.refCommission}%`;
+            document.getElementById('ref-link-input').value = `https://t.me/StudentPocketBot?start=${currentUser.id}`;
+
+            // Earning History Rendering
+            const histContainer = document.getElementById('history-container');
+            histContainer.innerHTML = '';
+            if (currentUser.history.length === 0) {
+                histContainer.innerHTML = '<div style="font-size:12px; color:var(--text-sub); text-align:center; padding:10px;">No earning history yet.</div>';
+            } else {
+                currentUser.history.slice(0, 5).forEach(item => {
+                    histContainer.innerHTML += `
+                        <div class="history-item">
+                            <div class="history-info">
+                                <div>${item.title}</div>
+                                <small>${item.date}</small>
+                            </div>
+                            <div class="history-amount">+$${item.amount.toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function setNavActive(element) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Activity Engine (MCQ / Math / Grammar)
+        function startActivity(type) {
+            currentActivity = type;
+            activeQIndex = 0;
+            const qList = db.questions[type];
+
+            if (!qList || qList.length === 0) {
+                alert('No questions available in this section right now!');
+                return;
+            }
+
+            document.getElementById('activity-title').innerText = 
+                type === 'mcq' ? 'MCQ Quiz' : type === 'math' ? 'Math Solver' : 'Grammar Solver';
+            
+            showScreen('activity-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            selectedOption = null;
+
+            const qList = db.questions[currentActivity];
+            const q = qList[activeQIndex];
+
+            document.getElementById('q-curr').innerText = activeQIndex + 1;
+            document.getElementById('q-total').innerText = qList.length;
+            document.getElementById('q-text').innerText = q.q;
+
+            const optContainer = document.getElementById('options-container');
+            optContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                optContainer.innerHTML += `
+                    <button class="option-btn" onclick="selectOption(this, ${idx})">${opt}</button>
+                `;
+            });
+
+            // Start Timer (20 seconds)
+            let timeLeft = 20;
+            document.getElementById('timer-text').innerText = `${timeLeft}s`;
+            document.getElementById('timer-progress').style.width = '100%';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-text').innerText = `${timeLeft}s`;
+                document.getElementById('timer-progress').style.width = `${(timeLeft / 20) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitAnswer(); // Auto submit on timeout
+                }
+            }, 1000);
+        }
+
+        function selectOption(btn, idx) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedOption = idx;
+        }
+
+        function submitAnswer() {
+            clearInterval(timerInterval);
+            const qList = db.questions[currentActivity];
+            const q = qList[activeQIndex];
+
+            let reward = 0;
+            if (selectedOption !== null && selectedOption === q.correct) {
+                reward = db.config[`${currentActivity}Reward`];
+                currentUser.balance += reward;
+                currentUser.earnedToday += reward;
+                currentUser.history.unshift({
+                    title: `${currentActivity.toUpperCase()} Completed`,
+                    date: new Date().toLocaleDateString(),
+                    amount: reward
+                });
+
+                // Commission to Referrer
+                if (currentUser.referredBy && db.users[currentUser.referredBy]) {
+                    const commAmount = (reward * db.config.refCommission) / 100;
+                    db.users[currentUser.referredBy].balance += commAmount;
+                }
+
+                alert(`Correct Answer! You earned $${reward.toFixed(2)}`);
+            } else {
+                alert('Wrong Answer or Timeout!');
+            }
+
+            db.users[currentUser.id] = currentUser;
+            saveDB(db);
+
+            activeQIndex++;
+            if (activeQIndex < qList.length) {
+                loadQuestion();
+            } else {
+                loadUserData();
+                showScreen('dashboard-screen');
+            }
+        }
+
+        // Referral Copy
+        function copyReferral() {
+            const link = document.getElementById('ref-link-input');
+            link.select();
+            document.execCommand('copy');
+            alert('Referral link copied to clipboard!');
+        }
+
+        // Withdrawal Request
+        function processWithdrawal() {
+            const method = document.getElementById('withdraw-method').value;
+            const acc = document.getElementById('withdraw-acc').value.trim();
+            const amt = parseFloat(document.getElementById('withdraw-amt').value);
+
+            if (!acc || isNaN(amt) || amt < 5) {
+                alert('Minimum withdrawal amount is $5.00 and valid account details are required.');
+                return;
+            }
+
+            if (currentUser.balance < amt) {
+                alert('Insufficient balance!');
+                return;
+            }
+
+            currentUser.balance -= amt;
+            currentUser.history.unshift({
+                title: `Withdrawal (${method})`,
+                date: new Date().toLocaleDateString(),
+                amount: -amt
+            });
+
+            db.users[currentUser.id] = currentUser;
+            saveDB(db);
+            loadUserData();
+
+            alert('Withdrawal request submitted successfully!');
+            document.getElementById('withdraw-acc').value = '';
+            document.getElementById('withdraw-amt').value = '';
+        }
+
+        // Admin Access Guard
+        function checkAdminAccess() {
+            if (db.adminIDs.includes(String(currentUser.id))) {
+                loadAdminData();
+                showScreen('admin-screen');
+            } else {
+                alert('Access Denied: You are not authorized as Admin!');
+            }
+        }
+
+        function showAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).style.display = 'block';
+        }
+
+        function loadAdminData() {
+            // Populate Users
+            const uList = document.getElementById('admin-users-list');
+            uList.innerHTML = '';
+            Object.values(db.users).forEach(u => {
+                uList.innerHTML += `
+                    <div style="background:#1e293b; padding:10px; border-radius:8px; font-size:12px;">
+                        <div><b>${u.name}</b> (ID: ${u.id})</div>
+                        <div>Balance: $${u.balance.toFixed(2)} | Status: ${u.isBanned ? 'Banned' : 'Active'}</div>
+                        <div style="margin-top:8px; display:flex; gap:5px;">
+                            <button class="btn" style="padding:4px; font-size:10px;" onclick="adminAdjustBalance('${u.id}', 1.00)">+ $1.00</button>
+                            <button class="btn btn-danger" style="padding:4px; font-size:10px;" onclick="adminToggleBan('${u.id}')">${u.isBanned ? 'Unban' : 'Ban'}</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Populate Config Fields
+            document.getElementById('cfg-mcq').value = db.config.mcqReward;
+            document.getElementById('cfg-math').value = db.config.mathReward;
+            document.getElementById('cfg-grammar').value = db.config.grammarReward;
+            document.getElementById('cfg-ref-bonus').value = db.config.refBonus;
+            document.getElementById('cfg-support').value = db.config.supportUrl;
+            document.getElementById('cfg-tutorial').value = db.config.tutorialUrl;
+        }
+
+        function adminAdjustBalance(userId, amt) {
+            db.users[userId].balance += amt;
+            saveDB(db);
+            loadAdminData();
+        }
+
+        function adminToggleBan(userId) {
+            db.users[userId].isBanned = !db.users[userId].isBanned;
+            saveDB(db);
+            loadAdminData();
+        }
+
+        function adminAddQuestion() {
+            const cat = document.getElementById('admin-q-cat').value;
+            const qText = document.getElementById('admin-q-text').value.trim();
+            const opts = document.getElementById('admin-q-options').value.split(',').map(s => s.trim());
+            const correct = parseInt(document.getElementById('admin-q-correct').value);
+
+            if (!qText || opts.length < 2 || isNaN(correct)) {
+                alert('Please provide valid question details!');
+                return;
+            }
+
+            db.questions[cat].push({ q: qText, options: opts, correct: correct });
+            saveDB(db);
+            alert('Question added successfully!');
+            document.getElementById('admin-q-text').value = '';
+            document.getElementById('admin-q-options').value = '';
+        }
+
+        function adminSaveConfig() {
+            db.config.mcqReward = parseFloat(document.getElementById('cfg-mcq').value);
+            db.config.mathReward = parseFloat(document.getElementById('cfg-math').value);
+            db.config.grammarReward = parseFloat(document.getElementById('cfg-grammar').value);
+            db.config.refBonus = parseFloat(document.getElementById('cfg-ref-bonus').value);
+            db.config.supportUrl = document.getElementById('cfg-support').value;
+            db.config.tutorialUrl = document.getElementById('cfg-tutorial').value;
+
+            saveDB(db);
+            updateConfigUI();
+            alert('Admin configuration updated!');
+        }
+
+        function adminSendBroadcast() {
+            const msg = document.getElementById('admin-broadcast-msg').value.trim();
+            if (!msg) return;
+
+            alert(`Global Broadcast Sent:\n\n"${msg}"`);
+            document.getElementById('admin-broadcast-msg').value = '';
+        }
+    </script>
+</body>
+</html>
