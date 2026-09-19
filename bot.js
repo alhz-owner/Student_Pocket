@@ -1,32 +1,21 @@
-const TelegramBot = require('node-telegram-bot-api').default || require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const path = require('path');
 
-// ==========================================
-// ১. আপনার Bot Token
-// ==========================================
-const BOT_TOKEN = '8116781152:AAFzQkOE9mv1NTLToGghKX0v6JHMefsVUV8';
-
-// ==========================================
-// ২. আপনার Mini App-এর Web URL (Render Link)
-// ==========================================
+const BOT_TOKEN = '8116781152:AAFzQkOE9mv1NTLTvGghKXOv6JHMefsUUV8';
 const MINI_APP_URL = 'https://your-domain-or-vercel-link.com';
 
-// বট ইনিশিয়ালাইজেশন
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
-// এক্সপ্রেস সার্ভার
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Static HTML File Serve করা (সঠিক লাইন)
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// বটের কমান্ড ও লজিক
 bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
     const chatId = msg.chat.id;
     const referralId = match[1];
