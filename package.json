@@ -1,9 +1,10 @@
 {
   "name": "student_pocket_bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "Student Pocket Telegram Bot",
   "main": "bot.js",
   "scripts": {
+    "start": "node bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -13,7 +14,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "bugs": {
     "url": "https://github.com/alhz-owner/Student_Pocket/issues"
   },
